@@ -16,7 +16,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       realm: "email",
       username: email,
       otp: code,
-      scope: "openid profile email offline_access",
+      scope: "openid profile email",
+      audience: "https://tn-dataverse-contact-api",
     }),
   });
 
@@ -26,9 +27,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({
     id_token: body.id_token,
     access_token: body.access_token,
-    refresh_token: body.refresh_token,
     email,
-    domain: process.env.AUTH0_DOMAIN,
-    client_id: process.env.AUTH0_CLIENT_ID,
   });
 }

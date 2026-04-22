@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { startPasswordless, verifyCode, getApiTokenFromSpa } from "./auth0";
+import { startPasswordless, verifyCode } from "./auth0";
 
 const API_AUDIENCE = "https://tn-dataverse-contact-api";
 
@@ -70,23 +70,15 @@ export default function App() {
     if (code.length !== 6) return;
     setError("");
     setLoading(true);
-    let phase: "verify OTP (server-side)" | "SPA → Auth0 token exchange" = "verify OTP (server-side)";
     try {
       const result = await verifyCode(form.email, code);
       console.log("Authenticated!", result);
       setVerified(true);
-      phase = "SPA → Auth0 token exchange";
-      const token = await getApiTokenFromSpa({
-        domain: result.domain,
-        clientId: result.client_id,
-        refreshToken: result.refresh_token,
-        audience: API_AUDIENCE,
-      });
-      setApiAccessToken(token);
+      setApiAccessToken(result.access_token);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      console.error(`[${phase}]`, e);
-      setError(`[step: ${phase}]\n${msg}`);
+      console.error("[verify OTP]", e);
+      setError(`[step: verify OTP]\n${msg}`);
     } finally {
       setLoading(false);
     }

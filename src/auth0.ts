@@ -6,7 +6,6 @@
 async function postJson(
   url: string,
   payload: unknown,
-  crossOriginHint = false,
 ): Promise<{ status: number; body: Record<string, unknown> }> {
   let res: Response;
   try {
@@ -17,10 +16,7 @@ async function postJson(
     });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
-    const hint = crossOriginHint
-      ? `\n\nThe browser fetch threw before a response came back. In Safari this shows as "Load failed"; in Chrome as "TypeError: Failed to fetch". Almost always this is CORS — add '${location.origin}' to the Auth0 Application's Allowed Web Origins. It can also be a bad domain, offline, or a blocked request.`
-      : "";
-    throw new Error(`Network error calling ${url}\n${msg}${hint}`);
+    throw new Error(`Network error calling ${url}\n${msg}`);
   }
   let body: Record<string, unknown> = {};
   try {
@@ -53,10 +49,7 @@ export async function verifyCode(
 ): Promise<{
   id_token: string;
   access_token: string;
-  refresh_token: string;
   email: string;
-  domain: string;
-  client_id: string;
 }> {
   const { status, body } = await postJson("/api/verify-code", { email, code });
   if (status < 200 || status >= 300) {
@@ -65,40 +58,6 @@ export async function verifyCode(
   return body as {
     id_token: string;
     access_token: string;
-    refresh_token: string;
     email: string;
-    domain: string;
-    client_id: string;
   };
-}
-
-// Calls Auth0's /oauth/token directly from the browser (no server hop, no secret).
-// Requires the Auth0 Application to be a public client
-// (Token Endpoint Authentication Method = None) with the refresh_token grant
-// enabled and Allowed Web Origins configured for this origin.
-export async function getApiTokenFromSpa(opts: {
-  domain: string;
-  clientId: string;
-  refreshToken: string;
-  audience: string;
-}): Promise<string> {
-  const url = `https://${opts.domain}/oauth/token`;
-  const { status, body } = await postJson(
-    url,
-    {
-      grant_type: "refresh_token",
-      client_id: opts.clientId,
-      refresh_token: opts.refreshToken,
-      audience: opts.audience,
-    },
-    true,
-  );
-  if (status < 200 || status >= 300) {
-    throw new Error(formatAuth0Error(url, status, body));
-  }
-  const token = body.access_token;
-  if (typeof token !== "string" || !token) {
-    throw new Error(`${url} returned 200 with no access_token. Body: ${JSON.stringify(body)}`);
-  }
-  return token;
 }
