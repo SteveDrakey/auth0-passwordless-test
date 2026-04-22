@@ -1,7 +1,29 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { startPasswordless, verifyCode } from "./auth0";
 
 const API_AUDIENCE = "https://tn-dataverse-contact-api";
+
+function decodeJwt(token: string): { header: unknown; payload: unknown } | null {
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  try {
+    const decodePart = (p: string): unknown => {
+      const base64 = p.replace(/-/g, "+").replace(/_/g, "/");
+      const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+      const binary = atob(padded);
+      const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+      return JSON.parse(new TextDecoder().decode(bytes));
+    };
+    return { header: decodePart(parts[0]), payload: decodePart(parts[1]) };
+  } catch {
+    return null;
+  }
+}
+
+function formatClaimTime(claim: unknown): string | null {
+  if (typeof claim !== "number") return null;
+  return new Date(claim * 1000).toISOString();
+}
 
 type Step = "info" | "email" | "review" | "done";
 
@@ -50,6 +72,11 @@ export default function App() {
   const [codeSent, setCodeSent] = useState(false);
   const [verified, setVerified] = useState(false);
   const [apiAccessToken, setApiAccessToken] = useState("");
+
+  const decoded = useMemo(
+    () => (apiAccessToken ? decodeJwt(apiAccessToken) : null),
+    [apiAccessToken],
+  );
 
   async function handleSendCode() {
     if (!form.email) return;
@@ -276,6 +303,40 @@ export default function App() {
                   <button style={btnSecondaryStyle} onClick={() => navigator.clipboard.writeText(apiAccessToken)}>
                     Copy token
                   </button>
+                  {decoded ? (
+                    <details open style={{ marginTop: 16 }}>
+                      <summary style={{ cursor: "pointer", fontWeight: 600, fontSize: 13, color: "#333" }}>Decoded JWT</summary>
+                      <div style={{ fontSize: 12, marginTop: 8 }}>
+                        <div style={{ color: "#666", marginBottom: 4, fontWeight: 600 }}>Header</div>
+                        <pre style={decodedPreStyle}>{JSON.stringify(decoded.header, null, 2)}</pre>
+                        <div style={{ color: "#666", margin: "12px 0 4px", fontWeight: 600 }}>Payload</div>
+                        <pre style={decodedPreStyle}>{JSON.stringify(decoded.payload, null, 2)}</pre>
+                        {typeof decoded.payload === "object" && decoded.payload !== null && (
+                          <div style={{ marginTop: 12, padding: "10px 12px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 6 }}>
+                            {(() => {
+                              const p = decoded.payload as Record<string, unknown>;
+                              const iat = formatClaimTime(p.iat);
+                              const exp = formatClaimTime(p.exp);
+                              return (
+                                <div style={{ color: "#333" }}>
+                                  {typeof p.aud !== "undefined" && <div><strong>aud:</strong> {JSON.stringify(p.aud)}</div>}
+                                  {typeof p.iss !== "undefined" && <div><strong>iss:</strong> {String(p.iss)}</div>}
+                                  {typeof p.sub !== "undefined" && <div><strong>sub:</strong> {String(p.sub)}</div>}
+                                  {typeof p.scope !== "undefined" && <div><strong>scope:</strong> {String(p.scope)}</div>}
+                                  {iat && <div><strong>iat:</strong> {iat}</div>}
+                                  {exp && <div><strong>exp:</strong> {exp}</div>}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        )}
+                      </div>
+                    </details>
+                  ) : (
+                    <div style={{ marginTop: 12, padding: "10px 12px", background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: 6, color: "#92400e", fontSize: 13 }}>
+                      Token is not a JWT (opaque / reference token). This happens when the requested audience doesn't match a registered Auth0 API — Auth0 falls back to a userinfo-style token. Register <code>{API_AUDIENCE}</code> as an API in Auth0 to get a signed JWT.
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div style={{ background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: 8, padding: "12px 16px", marginBottom: 20, color: "#92400e", fontSize: 13 }}>
@@ -401,6 +462,19 @@ const linkBtnStyle: React.CSSProperties = {
   fontSize: "inherit",
   textDecoration: "underline",
   padding: 0,
+};
+
+const decodedPreStyle: React.CSSProperties = {
+  margin: 0,
+  padding: "10px 12px",
+  background: "#0f172a",
+  color: "#e2e8f0",
+  borderRadius: 6,
+  fontSize: 12,
+  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+  whiteSpace: "pre-wrap",
+  wordBreak: "break-all",
+  overflow: "auto",
 };
 
 const infoBoxStyle: React.CSSProperties = {
