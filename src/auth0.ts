@@ -35,26 +35,26 @@ export function startPasswordless(email: string): Promise<void> {
   });
 }
 
-// Step 2: Verify the code via redirect to /authorize.
-// Uses passwordlessVerify directly (skips /co/authenticate which needs
-// the Passwordless OTP grant type that Auth0 doesn't allow on SPAs).
-// This redirects the user to Auth0, verifies the code, and redirects back
-// with tokens in the URL hash.
-export function verifyCode(email: string, code: string): void {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (webAuth as any).passwordlessVerify(
-    {
-      connection: "email",
-      email,
-      verificationCode: code,
-    },
-    (err: auth0.Auth0Error | null) => {
-      if (err) {
-        console.error("Verify redirect error:", err);
-      }
-      // On success, the browser redirects - we never reach here
-    },
-  );
+// Step 2: Verify the OTP code using passwordlessLogin.
+// On same-site domains (app on tnapps.co.uk, auth0 on auth0.dataverse-contact.tnapps.co.uk)
+// this uses cross-origin auth with same-site cookies - no third-party cookie issues.
+export function verifyCode(email: string, code: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    webAuth.passwordlessLogin(
+      {
+        connection: "email",
+        email,
+        verificationCode: code,
+      },
+      (err) => {
+        if (err) {
+          reject(new Error(err.description || err.error_description || (err as any).message || "Verification failed"));
+        } else {
+          resolve();
+        }
+      },
+    );
+  });
 }
 
 // Parse tokens from the URL hash after redirect back from Auth0
