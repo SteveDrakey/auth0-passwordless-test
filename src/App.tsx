@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { startPasswordless, verifyCode } from "./auth0";
+import { startPasswordless, verifyCode, getApiTokenFromSpa } from "./auth0";
+
+const API_AUDIENCE = "https://tn-dataverse-contact-api";
 
 type Step = "info" | "email" | "review" | "done";
 
@@ -47,6 +49,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [verified, setVerified] = useState(false);
+  const [apiAccessToken, setApiAccessToken] = useState("");
 
   async function handleSendCode() {
     if (!form.email) return;
@@ -70,6 +73,13 @@ export default function App() {
       const result = await verifyCode(form.email, code);
       console.log("Authenticated!", result);
       setVerified(true);
+      const token = await getApiTokenFromSpa({
+        domain: result.domain,
+        clientId: result.client_id,
+        refreshToken: result.refresh_token,
+        audience: API_AUDIENCE,
+      });
+      setApiAccessToken(token);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Verification failed");
     } finally {
@@ -297,10 +307,23 @@ export default function App() {
               but your request will still be processed.
             </p>
           )}
-          <p style={{ color: "#999", fontSize: 13, marginTop: 16 }}>
-            (Check the browser console for Auth0 tokens if verified)
-          </p>
-          <button style={{ ...btnStyle, marginTop: 8 }} onClick={() => { setStep("info"); setForm({ name: "", description: "", email: "" }); setCode(""); setCodeSent(false); setVerified(false); setError(""); }}>
+          {verified && apiAccessToken && (
+            <div style={{ marginTop: 24, textAlign: "left" }}>
+              <label style={labelStyle}>
+                Access token (aud: {API_AUDIENCE})
+              </label>
+              <textarea
+                readOnly
+                value={apiAccessToken}
+                style={{ ...inputStyle, fontFamily: "monospace", fontSize: 12, minHeight: 140, wordBreak: "break-all", whiteSpace: "pre-wrap" }}
+                onFocus={(e) => e.currentTarget.select()}
+              />
+              <button style={btnSecondaryStyle} onClick={() => navigator.clipboard.writeText(apiAccessToken)}>
+                Copy token
+              </button>
+            </div>
+          )}
+          <button style={{ ...btnStyle, marginTop: 24 }} onClick={() => { setStep("info"); setForm({ name: "", description: "", email: "" }); setCode(""); setCodeSent(false); setVerified(false); setApiAccessToken(""); setError(""); }}>
             Start again
           </button>
         </div>
