@@ -26,7 +26,7 @@ export function startPasswordless(email: string): Promise<void> {
       },
       (err) => {
         if (err) {
-          reject(new Error(err.description || err.error_description || err.message || "Failed to send code"));
+          reject(new Error(err.description || err.error_description || (err as any).message || "Failed to send code"));
         } else {
           resolve();
         }
