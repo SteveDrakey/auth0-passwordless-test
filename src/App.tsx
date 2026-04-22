@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { startPasswordless, verifyCode, parseHash } from "./auth0";
+import { useState } from "react";
+import { startPasswordless, verifyCode } from "./auth0";
 
 type Step = "info" | "email" | "review" | "done";
 
@@ -48,31 +48,6 @@ export default function App() {
   const [codeSent, setCodeSent] = useState(false);
   const [verified, setVerified] = useState(false);
 
-  // Check if returning from Auth0 redirect after code verification
-  useEffect(() => {
-    async function checkRedirect() {
-      try {
-        const result = await parseHash();
-        if (result) {
-          console.log("Authenticated!", result);
-          const raw = sessionStorage.getItem("passwordless-form");
-          if (raw) {
-            try {
-              setForm(JSON.parse(raw));
-            } catch { /* ignore */ }
-            sessionStorage.removeItem("passwordless-form");
-          }
-          setVerified(true);
-          setStep("done");
-        }
-      } catch (e) {
-        console.error("Auth redirect error:", e);
-        setError(e instanceof Error ? e.message : "Authentication failed");
-      }
-    }
-    checkRedirect();
-  }, []);
-
   async function handleSendCode() {
     if (!form.email) return;
     setError("");
@@ -87,14 +62,19 @@ export default function App() {
     }
   }
 
-  function handleVerify() {
+  async function handleVerify() {
     if (code.length !== 6) return;
     setError("");
     setLoading(true);
-    // Save form state before redirect
-    sessionStorage.setItem("passwordless-form", JSON.stringify(form));
-    // This will redirect to Auth0 and back
-    verifyCode(form.email, code);
+    try {
+      const result = await verifyCode(form.email, code);
+      console.log("Authenticated!", result);
+      setVerified(true);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Verification failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleSubmit() {
