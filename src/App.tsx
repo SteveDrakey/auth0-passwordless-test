@@ -104,7 +104,7 @@ export default function App() {
   return (
     <div style={{ maxWidth: 520, margin: "40px auto", fontFamily: "system-ui, sans-serif", padding: "0 20px" }}>
       <h1 style={{ color: "#0057b8", marginBottom: 4 }}>Report a problem</h1>
-      <p style={{ color: "#666", marginTop: 0, marginBottom: 24 }}>Passwordless auth test</p>
+      <p style={{ color: "#666", marginTop: 0, marginBottom: 24 }}>Passwordless auth test <span style={{ color: "#bbb", fontSize: 12 }}>({__BUILD_HASH__})</span></p>
 
       {step !== "done" && <StepIndicator current={step} />}
 
