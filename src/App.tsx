@@ -73,8 +73,9 @@ export default function App() {
     try {
       const result = await verifyCode(form.email, code);
       console.log("Authenticated!", result);
+      console.log("access_token:", result.access_token);
       setVerified(true);
-      setApiAccessToken(result.access_token);
+      setApiAccessToken(result.access_token ?? "");
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error("[verify OTP]", e);
@@ -250,16 +251,38 @@ export default function App() {
 
           {/* Verified */}
           {form.email && verified && (
-            <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 8, padding: "16px 20px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 24 }}>&#10003;</span>
-              <div>
-                <strong style={{ color: "#16a34a" }}>Email verified</strong>
-                <p style={{ margin: "4px 0 0", color: "#333", fontSize: 14 }}>
-                  Your account will be created when you submit. You'll be able to
-                  track this case and receive updates.
-                </p>
+            <>
+              <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 8, padding: "16px 20px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 24 }}>&#10003;</span>
+                <div>
+                  <strong style={{ color: "#16a34a" }}>Email verified</strong>
+                  <p style={{ margin: "4px 0 0", color: "#333", fontSize: 14 }}>
+                    Your account will be created when you submit. You'll be able to
+                    track this case and receive updates.
+                  </p>
+                </div>
               </div>
-            </div>
+              {apiAccessToken ? (
+                <div style={{ marginBottom: 20 }}>
+                  <label style={labelStyle}>
+                    Access token (aud: {API_AUDIENCE})
+                  </label>
+                  <textarea
+                    readOnly
+                    value={apiAccessToken}
+                    style={{ ...inputStyle, fontFamily: "monospace", fontSize: 12, minHeight: 140, wordBreak: "break-all", whiteSpace: "pre-wrap" }}
+                    onFocus={(e) => e.currentTarget.select()}
+                  />
+                  <button style={btnSecondaryStyle} onClick={() => navigator.clipboard.writeText(apiAccessToken)}>
+                    Copy token
+                  </button>
+                </div>
+              ) : (
+                <div style={{ background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: 8, padding: "12px 16px", marginBottom: 20, color: "#92400e", fontSize: 13 }}>
+                  Verified, but Auth0 didn't return an <code>access_token</code>. Check the browser console for the raw response. Likely cause: the API <code>{API_AUDIENCE}</code> isn't registered in Auth0, or the Application isn't authorized for it.
+                </div>
+              )}
+            </>
           )}
 
           <div style={{ display: "flex", gap: 12 }}>
