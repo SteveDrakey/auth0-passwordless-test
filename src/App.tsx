@@ -59,7 +59,8 @@ export default function App() {
       await startPasswordless(form.email);
       setCodeSent(true);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to send code");
+      const msg = e instanceof Error ? e.message : String(e);
+      setError(`[step: send passwordless code]\n${msg}`);
     } finally {
       setLoading(false);
     }
@@ -69,10 +70,12 @@ export default function App() {
     if (code.length !== 6) return;
     setError("");
     setLoading(true);
+    let phase: "verify OTP (server-side)" | "SPA → Auth0 token exchange" = "verify OTP (server-side)";
     try {
       const result = await verifyCode(form.email, code);
       console.log("Authenticated!", result);
       setVerified(true);
+      phase = "SPA → Auth0 token exchange";
       const token = await getApiTokenFromSpa({
         domain: result.domain,
         clientId: result.client_id,
@@ -81,7 +84,9 @@ export default function App() {
       });
       setApiAccessToken(token);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Verification failed");
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error(`[${phase}]`, e);
+      setError(`[step: ${phase}]\n${msg}`);
     } finally {
       setLoading(false);
     }
@@ -99,7 +104,7 @@ export default function App() {
       {step !== "done" && <StepIndicator current={step} />}
 
       {error && (
-        <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 6, padding: "10px 14px", marginBottom: 16, color: "#b91c1c", fontSize: 14 }}>
+        <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 6, padding: "10px 14px", marginBottom: 16, color: "#b91c1c", fontSize: 13, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
           {error}
         </div>
       )}
