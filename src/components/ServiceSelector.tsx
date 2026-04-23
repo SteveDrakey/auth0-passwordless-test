@@ -54,6 +54,10 @@ export default function ServiceSelector({ onSelect }: ServiceSelectorProps) {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-navy">Council services</h1>
         <p className="text-gray-500 text-sm mt-1">Choose a service to get started</p>
+        <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-600">
+          Identity powered by <strong>Auth0</strong> — each service demonstrates a different authentication pattern,
+          from simple email verification to full multi-factor authentication.
+        </div>
       </div>
 
       <div className="space-y-4">
