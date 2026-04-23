@@ -11,9 +11,11 @@ export default function App() {
 
   // Parse URL hash for MFA callback results
   useEffect(() => {
-    if (window.location.hash === "#mfa-complete") {
+    const hash = window.location.hash;
+    if (hash.startsWith("#mfa-complete")) {
       setView("bin-universal");
-      window.location.hash = "";
+    } else if (hash.startsWith("#mfa-error")) {
+      setView("bin-universal");
     }
   }, []);
 

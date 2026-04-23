@@ -43,6 +43,14 @@ export async function startPasswordless(email: string): Promise<void> {
   }
 }
 
+export async function getMfaLoginUrl(): Promise<string> {
+  const { status, body } = await postJson("/api/mfa-login", {});
+  if (status < 200 || status >= 300) {
+    throw new Error(formatAuth0Error("/api/mfa-login", status, body));
+  }
+  return body.url as string;
+}
+
 export async function verifyCode(
   email: string,
   code: string,
@@ -60,4 +68,44 @@ export async function verifyCode(
     access_token: string;
     email: string;
   };
+}
+
+/* ── Inline MFA (password + TOTP) ── */
+
+export async function mfaSignup(email: string, password: string): Promise<{ user_id: string }> {
+  const { status, body } = await postJson("/api/mfa-signup", { email, password });
+  if (status < 200 || status >= 300) {
+    throw new Error(formatAuth0Error("/api/mfa-signup", status, body));
+  }
+  return body as { user_id: string };
+}
+
+export async function mfaChallenge(
+  email: string,
+  password: string,
+): Promise<{ mfa_token?: string; access_token?: string; id_token?: string }> {
+  const { status, body } = await postJson("/api/mfa-challenge", { email, password });
+  if (status < 200 || status >= 300) {
+    throw new Error(formatAuth0Error("/api/mfa-challenge", status, body));
+  }
+  return body as { mfa_token?: string; access_token?: string; id_token?: string };
+}
+
+export async function mfaEnrol(mfaToken: string): Promise<{ secret: string; barcode_uri: string }> {
+  const { status, body } = await postJson("/api/mfa-enrol", { mfa_token: mfaToken });
+  if (status < 200 || status >= 300) {
+    throw new Error(formatAuth0Error("/api/mfa-enrol", status, body));
+  }
+  return body as { secret: string; barcode_uri: string };
+}
+
+export async function mfaVerify(
+  mfaToken: string,
+  otp: string,
+): Promise<{ access_token: string; id_token: string; email: string }> {
+  const { status, body } = await postJson("/api/mfa-verify", { mfa_token: mfaToken, otp });
+  if (status < 200 || status >= 300) {
+    throw new Error(formatAuth0Error("/api/mfa-verify", status, body));
+  }
+  return body as { access_token: string; id_token: string; email: string };
 }
