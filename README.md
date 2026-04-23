@@ -15,18 +15,18 @@ All Auth0 calls are proxied through Vercel serverless functions (`/api/send-code
 
 ## Why a Regular Web App, not an SPA
 
-Auth0's documentation steers you towards using a **Single Page Application** with the `auth0-spa-js` SDK and Universal Login for passwordless flows. In practice, this doesn't work well for our use case:
+Auth0's documentation generally points you towards using a **Single Page Application** with the `auth0-spa-js` SDK and Universal Login for passwordless flows. For our use case, this presented a few challenges:
 
-- **Universal Login redirect** breaks the user's flow. They're mid-way through a form, they get bounced to an Auth0-hosted page, and they lose context. For a simple "verify your email" step embedded in a wizard, this is a terrible experience.
-- **The `auth0.js` SPA SDK** supports passwordless (`passwordlessStart` / `passwordlessLogin`) but requires **cross-origin authentication**, which means:
-  - You need a custom domain on Auth0 (not just a CNAME — a full custom domain with matching cookies)
-  - Third-party cookies must be enabled in the browser (increasingly blocked by default)
-  - CORS and cookie-sharing configuration is fragile and poorly documented
-- **The Auth0 docs are misleading** — they show the SPA passwordless flow as straightforward, but bury the cross-origin requirements in separate pages. You can spend hours debugging `login_required` or `consent_required` errors before discovering that the entire approach needs a custom domain and third-party cookie support to function.
+- **Universal Login redirect** takes the user away from the form mid-flow. For a simple "verify your email" step embedded in a wizard, keeping everything inline feels much smoother.
+- **The `auth0.js` SPA SDK** does support passwordless (`passwordlessStart` / `passwordlessLogin`), but it relies on **cross-origin authentication**, which requires:
+  - A custom domain on Auth0 (not just a CNAME — a full custom domain with matching cookies)
+  - Third-party cookies enabled in the browser (increasingly restricted by default)
+  - Careful CORS and cookie-sharing configuration
+- **The Auth0 docs could be clearer on this** — the SPA passwordless examples look straightforward at first glance, but the cross-origin requirements are covered separately. It's easy to run into `login_required` or `consent_required` errors without realising the underlying cause.
 
-This project takes a different approach: the **frontend is an SPA** (React + Vite), but **Auth0 sees a Regular Web Application**. The passwordless API calls go through server-side Vercel functions that use a `client_secret`, avoiding all cross-origin issues entirely. No redirects, no third-party cookies, no Universal Login page — just a clean inline OTP flow.
+This project takes a simpler approach: the **frontend is an SPA** (React + Vite), but **Auth0 sees a Regular Web Application**. The passwordless API calls go through server-side Vercel functions that use a `client_secret`, sidestepping cross-origin concerns entirely. No redirects, no third-party cookies, no Universal Login page — just a clean inline OTP flow.
 
-The tradeoff is that you need a backend (or serverless functions) to proxy the Auth0 calls. For a Vercel-hosted app, this is trivial — you just add files to the `api/` folder.
+The tradeoff is that you need a backend (or serverless functions) to proxy the Auth0 calls. For a Vercel-hosted app, this is straightforward — just add files to the `api/` folder.
 
 ## Stack
 
