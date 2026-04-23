@@ -77,17 +77,15 @@ export default function ServiceSelector({ onSelect }: ServiceSelectorProps) {
             with a different authentication method, demonstrating how a single platform
             supports multiple assurance levels.
           </p>
-          <div className="flex gap-4 mt-2 text-xs">
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${assuranceStyles.Low}`}>
-              Low Assurance
-            </span>
-            <span className="text-gray-500">Contactable identity — just prove you own the email</span>
-          </div>
-          <div className="flex gap-4 mt-1 text-xs">
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${assuranceStyles.Medium}`}>
-              Medium Assurance
-            </span>
-            <span className="text-gray-500">Persistent account — password + multi-factor authentication</span>
+          <div className="mt-2 space-y-1 text-xs">
+            <div>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${assuranceStyles.Low}`}>Low</span>
+              <span className="text-gray-500 ml-2">Contactable identity — prove you own the email</span>
+            </div>
+            <div>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${assuranceStyles.Medium}`}>Medium</span>
+              <span className="text-gray-500 ml-2">Persistent account — password + MFA</span>
+            </div>
           </div>
         </div>
       </div>
@@ -104,15 +102,15 @@ export default function ServiceSelector({ onSelect }: ServiceSelectorProps) {
                 {card.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
                   <h2 className="text-lg font-semibold text-gray-900">{card.title}</h2>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-council-50 text-council">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-council-50 text-council whitespace-nowrap">
                     {card.badge}
                   </span>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${assuranceStyles[card.assurance]}`}>
-                    {card.assurance} Assurance
-                  </span>
                 </div>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${assuranceStyles[card.assurance]}`}>
+                  {card.assurance} Assurance
+                </span>
                 <p className="text-sm text-gray-500 mt-1">{card.description}</p>
               </div>
               <svg className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1 group-hover:text-council transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
