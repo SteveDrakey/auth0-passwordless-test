@@ -13,6 +13,21 @@ The app sends a one-time code to the user's email via Auth0's Passwordless API. 
 
 All Auth0 calls are proxied through Vercel serverless functions (`/api/send-code`, `/api/verify-code`) so the client secret never reaches the browser.
 
+## Why a Regular Web App, not an SPA
+
+Auth0's documentation steers you towards using a **Single Page Application** with the `auth0-spa-js` SDK and Universal Login for passwordless flows. In practice, this doesn't work well for our use case:
+
+- **Universal Login redirect** breaks the user's flow. They're mid-way through a form, they get bounced to an Auth0-hosted page, and they lose context. For a simple "verify your email" step embedded in a wizard, this is a terrible experience.
+- **The `auth0.js` SPA SDK** supports passwordless (`passwordlessStart` / `passwordlessLogin`) but requires **cross-origin authentication**, which means:
+  - You need a custom domain on Auth0 (not just a CNAME — a full custom domain with matching cookies)
+  - Third-party cookies must be enabled in the browser (increasingly blocked by default)
+  - CORS and cookie-sharing configuration is fragile and poorly documented
+- **The Auth0 docs are misleading** — they show the SPA passwordless flow as straightforward, but bury the cross-origin requirements in separate pages. You can spend hours debugging `login_required` or `consent_required` errors before discovering that the entire approach needs a custom domain and third-party cookie support to function.
+
+This project takes a different approach: the **frontend is an SPA** (React + Vite), but **Auth0 sees a Regular Web Application**. The passwordless API calls go through server-side Vercel functions that use a `client_secret`, avoiding all cross-origin issues entirely. No redirects, no third-party cookies, no Universal Login page — just a clean inline OTP flow.
+
+The tradeoff is that you need a backend (or serverless functions) to proxy the Auth0 calls. For a Vercel-hosted app, this is trivial — you just add files to the `api/` folder.
+
 ## Stack
 
 - **Frontend:** React 19, TypeScript, Tailwind CSS 4, Vite
