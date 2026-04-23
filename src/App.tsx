@@ -99,17 +99,17 @@ function TokenSuccess({ token }: { token: string }) {
   return (
     <div className="space-y-4 mb-6">
       {/* Success banner */}
-      <div className="bg-council-50 border border-council-200 rounded-xl p-5">
+      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full bg-council-100 flex items-center justify-center flex-shrink-0">
-            <svg className="w-5 h-5 text-council" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+            <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
             </svg>
           </div>
           <div>
-            <h3 className="font-semibold text-council-800 text-base">API Access Token Granted</h3>
-            <p className="text-sm text-council-700 mt-1">
-              Auth0 issued a signed JWT for the <code className="bg-council-100 px-1.5 py-0.5 rounded text-xs font-mono">{String(p.aud ?? API_AUDIENCE)}</code> API.
+            <h3 className="font-semibold text-emerald-800 text-base">API Access Token Granted</h3>
+            <p className="text-sm text-emerald-700 mt-1">
+              Auth0 issued a signed JWT for the <code className="bg-emerald-100 px-1.5 py-0.5 rounded text-xs font-mono">{String(p.aud ?? API_AUDIENCE)}</code> API.
             </p>
           </div>
         </div>
@@ -231,34 +231,38 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#dee2e6]">
       {/* Council-style header bar */}
       <div className="bg-council">
         <div className="max-w-lg mx-auto px-5 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-white/20 rounded flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21" />
-              </svg>
-            </div>
             <div>
-              <div className="text-white font-bold text-sm tracking-wide">Council Services</div>
-              <div className="text-white/60 text-xs">Citizen Portal Demo</div>
+              <div className="text-white font-bold text-base tracking-wide">Leeds</div>
+              <div className="text-white/80 text-xs">City Council</div>
             </div>
           </div>
-          <span className="text-white/40 text-xs font-mono">{__BUILD_HASH__}</span>
+          <div className="flex items-center gap-4">
+            <span className="text-link text-sm font-medium border-b-2 border-accent text-white">Services</span>
+            <span className="text-white/80 text-sm">Apply, report or pay</span>
+          </div>
         </div>
       </div>
+
+      {/* Amber accent strip */}
+      <div className="h-1 bg-accent"></div>
 
       <div className="max-w-lg mx-auto px-5 py-8">
         {/* Page heading */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-navy">Report a problem</h1>
-          <p className="text-gray-500 text-sm mt-1">Tell us about an issue and we'll get it sorted</p>
+          <p className="text-gray-500 text-sm mt-1">
+            Tell us about an issue and we'll get it sorted
+            <span className="text-gray-400 ml-2 text-xs font-mono">{__BUILD_HASH__}</span>
+          </p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
           {step !== "done" && <StepIndicator current={step} />}
 
           {error && (
@@ -368,15 +372,15 @@ export default function App() {
 
               {/* Email but not verified */}
               {form.email && !verified && (
-                <div className="bg-council-50 border border-council-200 rounded-xl p-5">
-                  <p className="font-semibold text-council-800 mb-1">Want to track your case online?</p>
-                  <p className="text-sm text-council-700 leading-relaxed mb-3">
+                <div className="bg-amber-50 border-l-4 border-accent rounded-r-lg p-5">
+                  <p className="font-semibold text-gray-800 mb-1">Want to track your case online?</p>
+                  <p className="text-sm text-gray-600 leading-relaxed mb-3">
                     Verify your email to create an account. Or just hit submit — your request will still be processed.
                   </p>
 
                   {!codeSent ? (
                     <button
-                      className="bg-council hover:bg-council-dark text-white font-medium py-2.5 px-5 rounded-lg text-sm transition disabled:opacity-50 cursor-pointer"
+                      className="bg-accent hover:bg-accent-dark text-navy font-semibold py-2.5 px-5 rounded-lg text-sm transition disabled:opacity-50 cursor-pointer"
                       disabled={loading}
                       onClick={handleSendCode}
                     >
@@ -384,12 +388,12 @@ export default function App() {
                     </button>
                   ) : (
                     <div className="space-y-2">
-                      <p className="text-sm text-council-800">
+                      <p className="text-sm text-gray-800">
                         We've sent a 6-digit code to <strong>{form.email}</strong>
                       </p>
                       <div className="flex gap-2 items-center">
                         <input
-                          className="w-36 px-3 py-2.5 border border-council-200 rounded-lg text-xl font-mono tracking-[0.3em] text-center focus:ring-2 focus:ring-council/30 focus:border-council outline-none"
+                          className="w-36 px-3 py-2.5 border border-gray-300 rounded-lg text-xl font-mono tracking-[0.3em] text-center focus:ring-2 focus:ring-accent/40 focus:border-accent outline-none bg-white"
                           value={code}
                           onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                           placeholder="000000"
@@ -397,7 +401,7 @@ export default function App() {
                           autoFocus
                         />
                         <button
-                          className="bg-council hover:bg-council-dark text-white font-medium py-2.5 px-4 rounded-lg text-sm transition disabled:opacity-50 cursor-pointer"
+                          className="bg-council hover:bg-council-dark text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition disabled:opacity-50 cursor-pointer"
                           disabled={code.length !== 6 || loading}
                           onClick={handleVerify}
                         >
@@ -418,15 +422,15 @@ export default function App() {
               {/* Verified + token display */}
               {form.email && verified && (
                 <>
-                  <div className="bg-council-50 border border-council-200 rounded-xl p-4 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-council-100 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-council" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                       </svg>
                     </div>
                     <div>
-                      <span className="font-semibold text-council-800">Email verified</span>
-                      <p className="text-sm text-council-700 mt-0.5">Your account will be created when you submit.</p>
+                      <span className="font-semibold text-emerald-800">Email verified</span>
+                      <p className="text-sm text-emerald-700 mt-0.5">Your account will be created when you submit.</p>
                     </div>
                   </div>
 
@@ -454,8 +458,8 @@ export default function App() {
           {/* Done */}
           {step === "done" && (
             <div className="text-center py-6">
-              <div className="w-16 h-16 rounded-full bg-council-100 flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-council" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
               </div>
