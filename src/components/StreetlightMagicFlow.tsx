@@ -4,7 +4,7 @@ import StepIndicator from "./shared/StepIndicator";
 import TokenSuccess from "./shared/TokenSuccess";
 import Auth0Badge from "./shared/Auth0Badge";
 
-type Step = "info" | "email" | "review" | "done";
+type Step = "info" | "email" | "submitted" | "verified";
 
 interface FormData {
   name: string;
@@ -15,7 +15,7 @@ interface FormData {
 const STEPS = [
   { key: "info", label: "Request", num: 1 },
   { key: "email", label: "Details", num: 2 },
-  { key: "review", label: "Review", num: 3 },
+  { key: "submitted", label: "Submitted", num: 3 },
 ];
 
 interface StreetlightMagicFlowProps {
@@ -27,8 +27,6 @@ export default function StreetlightMagicFlow({ onBack }: StreetlightMagicFlowPro
   const [form, setForm] = useState<FormData>({ name: "", description: "", email: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [linkSent, setLinkSent] = useState(false);
-  const [verified, setVerified] = useState(false);
   const [apiAccessToken, setApiAccessToken] = useState("");
 
   // Check for magic link callback on mount
@@ -39,25 +37,24 @@ export default function StreetlightMagicFlow({ onBack }: StreetlightMagicFlowPro
       const accessToken = params.get("access_token") || "";
       if (accessToken) {
         setApiAccessToken(accessToken);
-        setVerified(true);
-        setStep("done");
+        setStep("verified");
       }
       window.history.replaceState(null, "", window.location.pathname);
     } else if (hash.startsWith("#magic-error")) {
       const params = new URLSearchParams(hash.replace("#magic-error?", ""));
       setError(params.get("error") || "Magic link verification failed");
-      setStep("review");
       window.history.replaceState(null, "", window.location.pathname);
     }
   }, []);
 
-  async function handleSendLink() {
-    if (!form.email) return;
+  async function handleSubmit() {
     setError("");
     setLoading(true);
     try {
-      await sendMagicLink(form.email);
-      setLinkSent(true);
+      if (form.email) {
+        await sendMagicLink(form.email);
+      }
+      setStep("submitted");
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -86,7 +83,7 @@ export default function StreetlightMagicFlow({ onBack }: StreetlightMagicFlowPro
 
       {/* Card */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
-        {step !== "done" && <StepIndicator current={step} steps={STEPS} />}
+        {step !== "submitted" && step !== "verified" && <StepIndicator current={step} steps={STEPS} />}
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-5 text-red-700 text-sm font-mono whitespace-pre-wrap break-words">
@@ -94,7 +91,7 @@ export default function StreetlightMagicFlow({ onBack }: StreetlightMagicFlowPro
           </div>
         )}
 
-        {/* Step 1 */}
+        {/* Step 1 — What's the problem? */}
         {step === "info" && (
           <div className="space-y-4">
             <div>
@@ -125,7 +122,7 @@ export default function StreetlightMagicFlow({ onBack }: StreetlightMagicFlowPro
           </div>
         )}
 
-        {/* Step 2 */}
+        {/* Step 2 — Email (optional) */}
         {step === "email" && (
           <div className="space-y-4">
             <div>
@@ -142,8 +139,9 @@ export default function StreetlightMagicFlow({ onBack }: StreetlightMagicFlowPro
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600 leading-relaxed">
               <p className="font-medium text-gray-700 mb-1">Why provide an email?</p>
               <p>
-                We'll send you a magic link to verify your email and create an account.
-                You can also skip this and submit without one — your request will still be processed.
+                If you provide an email, we'll send you a magic link after you submit.
+                Click it whenever you like to verify your identity and track your case online.
+                Your report is submitted either way.
               </p>
             </div>
             <div className="flex gap-3">
@@ -154,155 +152,77 @@ export default function StreetlightMagicFlow({ onBack }: StreetlightMagicFlowPro
                 Back
               </button>
               <button
-                className="flex-1 bg-council hover:bg-council-dark text-white font-semibold py-3 px-6 rounded-lg transition cursor-pointer"
-                onClick={() => { setLinkSent(false); setVerified(false); setError(""); setStep("review"); }}
+                className="flex-1 bg-council hover:bg-council-dark text-white font-semibold py-3 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                disabled={loading}
+                onClick={handleSubmit}
               >
-                Next
+                {loading ? "Submitting..." : form.email ? "Submit & send magic link" : "Submit anonymously"}
               </button>
             </div>
           </div>
         )}
 
-        {/* Step 3 */}
-        {step === "review" && (
-          <div className="space-y-5">
-            {/* Summary */}
-            <div className="bg-gray-50 rounded-xl p-4 space-y-2.5">
-              <div>
-                <div className="text-xs text-gray-400 uppercase tracking-wider">Name</div>
-                <div className="font-semibold text-gray-800">{form.name}</div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-400 uppercase tracking-wider">Problem</div>
-                <div className="text-gray-700">{form.description}</div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-400 uppercase tracking-wider">Email</div>
-                <div className="text-gray-700">{form.email || <span className="text-gray-400 italic">Not provided</span>}</div>
-              </div>
-            </div>
-
-            {/* No email */}
-            {!form.email && (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600">
-                You're submitting anonymously.{" "}
-                <button className="text-link hover:underline cursor-pointer" onClick={() => setStep("email")}>
-                  Add an email
-                </button>{" "}
-                if you'd like updates.
-              </div>
-            )}
-
-            {/* Email but not verified */}
-            {form.email && !verified && (
-              <div className="bg-amber-50 border-l-4 border-accent rounded-r-lg p-5">
-                <p className="font-semibold text-gray-800 mb-1">Want to track your case online?</p>
-                <p className="text-sm text-gray-600 leading-relaxed mb-3">
-                  We'll email you a magic link — click it to verify your email and create an account.
-                  Or just hit submit without verifying.
-                </p>
-
-                {!linkSent ? (
-                  <button
-                    className="bg-accent hover:bg-accent-dark text-navy font-semibold py-2.5 px-5 rounded-lg text-sm transition disabled:opacity-50 cursor-pointer"
-                    disabled={loading}
-                    onClick={handleSendLink}
-                  >
-                    {loading ? "Sending..." : "Send me a magic link"}
-                  </button>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="bg-white border border-amber-200 rounded-lg p-4">
-                      <div className="flex items-start gap-3">
-                        <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                        </svg>
-                        <div>
-                          <p className="text-sm font-medium text-gray-800">
-                            Magic link sent to <strong>{form.email}</strong>
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            Check your inbox and click the link to verify. The link expires in 5 minutes.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      Didn't get it?{" "}
-                      <button className="text-link underline hover:no-underline cursor-pointer" onClick={handleSendLink} disabled={loading}>
-                        Resend
-                      </button>
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Verified */}
-            {form.email && verified && (
-              <>
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-emerald-800">Email verified</span>
-                    <p className="text-sm text-emerald-700 mt-0.5">Your account will be created when you submit.</p>
-                  </div>
-                </div>
-
-                {apiAccessToken && <TokenSuccess token={apiAccessToken} />}
-              </>
-            )}
-
-            <div className="flex gap-3">
-              <button
-                className="flex-1 bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 px-6 rounded-lg border border-gray-300 transition cursor-pointer"
-                onClick={() => setStep("email")}
-              >
-                Back
-              </button>
-              <button
-                className="flex-1 bg-council hover:bg-council-dark text-white font-semibold py-3 px-6 rounded-lg transition cursor-pointer"
-                onClick={() => setStep("done")}
-              >
-                {form.email && verified ? "Submit" : form.email ? "Submit without verifying" : "Submit anonymously"}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Done */}
-        {step === "done" && (
+        {/* Submitted — waiting for magic link click */}
+        {step === "submitted" && (
           <div className="text-center py-6">
             <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Submitted!</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Report submitted!</h2>
             <p className="text-gray-600 mb-1">
               Thanks <strong>{form.name}</strong>, your request has been submitted.
             </p>
-            {form.email && verified && (
-              <p className="text-gray-600">
-                Your account has been created with <strong>{form.email}</strong>.
-              </p>
-            )}
-            {form.email && !verified && (
-              <p className="text-gray-500 text-sm">
-                Email provided but not verified — we may use it to contact you.
-              </p>
-            )}
-            {!form.email && (
-              <p className="text-gray-500 text-sm">
+
+            {form.email ? (
+              <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-5 text-left">
+                <div className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                  </svg>
+                  <div>
+                    <p className="font-semibold text-gray-800">Check your email</p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      We've sent a magic link to <strong>{form.email}</strong>.
+                      Click it to verify your identity and track your case online.
+                    </p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      You can close this page — the link will work whenever you click it.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-500 text-sm mt-2">
                 Submitted anonymously. We won't be able to send updates.
               </p>
             )}
 
-            {verified && apiAccessToken && (
+            <button
+              className="mt-6 bg-council hover:bg-council-dark text-white font-semibold py-3 px-8 rounded-lg transition cursor-pointer"
+              onClick={() => { setStep("info"); setForm({ name: "", description: "", email: "" }); setApiAccessToken(""); setError(""); }}
+            >
+              Report another issue
+            </button>
+          </div>
+        )}
+
+        {/* Verified — user clicked the magic link and came back */}
+        {step === "verified" && (
+          <div className="text-center py-6">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Email verified!</h2>
+            <p className="text-gray-600 mb-1">
+              Your identity has been confirmed via magic link.
+              You can now track your case online.
+            </p>
+
+            {apiAccessToken && (
               <div className="mt-6 text-left">
                 <TokenSuccess token={apiAccessToken} />
               </div>
@@ -310,9 +230,9 @@ export default function StreetlightMagicFlow({ onBack }: StreetlightMagicFlowPro
 
             <button
               className="mt-6 bg-council hover:bg-council-dark text-white font-semibold py-3 px-8 rounded-lg transition cursor-pointer"
-              onClick={() => { setStep("info"); setForm({ name: "", description: "", email: "" }); setLinkSent(false); setVerified(false); setApiAccessToken(""); setError(""); }}
+              onClick={() => { setStep("info"); setForm({ name: "", description: "", email: "" }); setApiAccessToken(""); setError(""); }}
             >
-              Start again
+              Report another issue
             </button>
           </div>
         )}

@@ -85,8 +85,8 @@ export default function BinOrderUniversalFlow({ onBack }: BinOrderUniversalFlowP
           </svg>
           All services
         </button>
-        <h1 className="text-2xl font-bold text-navy">Order a new bin (Auth0)</h1>
-        <p className="text-gray-500 text-sm mt-1">Identity verification via Auth0 hosted page</p>
+        <h1 className="text-2xl font-bold text-navy">Order a new bin</h1>
+        <p className="text-gray-500 text-sm mt-1">Sign in with password and MFA via Auth0 Universal Login</p>
       </div>
 
       {/* Card */}

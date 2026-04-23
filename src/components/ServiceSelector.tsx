@@ -29,7 +29,7 @@ const cards: ServiceCard[] = [
   {
     service: "streetlight",
     title: "Report a streetlight",
-    description: "Quick report, just verify your email with a one-time code",
+    description: "Enter a code sent to your email to verify your identity",
     badge: "Email OTP",
     assurance: "Low",
     icon: streetlightIcon,
@@ -37,7 +37,7 @@ const cards: ServiceCard[] = [
   {
     service: "streetlight-magic",
     title: "Report a streetlight",
-    description: "Verify your email by clicking a link we send you",
+    description: "Submit your report, then click a link in your email to verify",
     badge: "Magic Link",
     assurance: "Low",
     icon: streetlightIcon,
@@ -45,15 +45,15 @@ const cards: ServiceCard[] = [
   {
     service: "bin-inline",
     title: "Order a new bin",
-    description: "Full identity verification built into the app",
-    badge: "Password + Authenticator",
+    description: "Sign in with password and authenticator app, all within this site",
+    badge: "Inline MFA",
     assurance: "Medium",
     icon: binIcon,
   },
   {
     service: "bin-universal",
-    title: "Order a new bin (Auth0)",
-    description: "Identity verification via Auth0 hosted page",
+    title: "Order a new bin",
+    description: "Redirects to a hosted Auth0 login page for password and MFA",
     badge: "Universal Login",
     assurance: "Medium",
     icon: binIcon,
@@ -71,9 +71,24 @@ export default function ServiceSelector({ onSelect }: ServiceSelectorProps) {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-navy">Council services</h1>
         <p className="text-gray-500 text-sm mt-1">Choose a service to get started</p>
-        <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-600">
-          Identity powered by <strong>Auth0</strong> — each service demonstrates a different authentication pattern,
-          from simple email verification to full multi-factor authentication.
+        <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-600 leading-relaxed">
+          <p>
+            Identity powered by <strong>Auth0</strong>. Each card below is the same service
+            with a different authentication method, demonstrating how a single platform
+            supports multiple assurance levels.
+          </p>
+          <div className="flex gap-4 mt-2 text-xs">
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${assuranceStyles.Low}`}>
+              Low Assurance
+            </span>
+            <span className="text-gray-500">Contactable identity — just prove you own the email</span>
+          </div>
+          <div className="flex gap-4 mt-1 text-xs">
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${assuranceStyles.Medium}`}>
+              Medium Assurance
+            </span>
+            <span className="text-gray-500">Persistent account — password + multi-factor authentication</span>
+          </div>
         </div>
       </div>
 
