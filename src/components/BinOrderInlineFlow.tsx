@@ -5,10 +5,11 @@ import TokenSuccess from "./shared/TokenSuccess";
 import Auth0Badge from "./shared/Auth0Badge";
 
 type Step = "request" | "account" | "authenticator" | "done";
+type AccountMode = "signup" | "signin";
 
 const STEPS = [
   { key: "request", label: "Your request", num: 1 },
-  { key: "account", label: "Create account", num: 2 },
+  { key: "account", label: "Sign in", num: 2 },
   { key: "authenticator", label: "Authenticator", num: 3 },
 ];
 
@@ -19,6 +20,7 @@ interface BinOrderInlineFlowProps {
 export default function BinOrderInlineFlow({ onBack }: BinOrderInlineFlowProps) {
   const [step, setStep] = useState<Step>("request");
   const [form, setForm] = useState({ binType: "", address: "", email: "", password: "" });
+  const [accountMode, setAccountMode] = useState<AccountMode>("signin");
   const [mfaToken, setMfaToken] = useState("");
   const [barcodeUri, setBarcodeUri] = useState("");
   const [secret, setSecret] = useState("");
@@ -27,13 +29,15 @@ export default function BinOrderInlineFlow({ onBack }: BinOrderInlineFlowProps) 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleCreateAccount() {
+  async function handleAccount() {
     if (!form.email || !form.password) return;
     setError("");
     setLoading(true);
     try {
-      // 1. Create user
-      await mfaSignup(form.email, form.password);
+      // 1. Create user (only for signup)
+      if (accountMode === "signup") {
+        await mfaSignup(form.email, form.password);
+      }
 
       // 2. Authenticate (Resource Owner Password Grant)
       const challengeResult = await mfaChallenge(form.email, form.password);
@@ -49,12 +53,18 @@ export default function BinOrderInlineFlow({ onBack }: BinOrderInlineFlowProps) 
         throw new Error("Unexpected response: no mfa_token or access_token");
       }
 
-      // 3. Enrol TOTP authenticator
-      const enrolResult = await mfaEnrol(challengeResult.mfa_token);
       setMfaToken(challengeResult.mfa_token);
-      setBarcodeUri(enrolResult.barcode_uri);
-      setSecret(enrolResult.secret);
-      setStep("authenticator");
+
+      if (accountMode === "signin") {
+        // Already enrolled — go straight to OTP verification
+        setStep("authenticator");
+      } else {
+        // 3. Enrol TOTP authenticator
+        const enrolResult = await mfaEnrol(challengeResult.mfa_token);
+        setBarcodeUri(enrolResult.barcode_uri);
+        setSecret(enrolResult.secret);
+        setStep("authenticator");
+      }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -139,16 +149,52 @@ export default function BinOrderInlineFlow({ onBack }: BinOrderInlineFlowProps) 
           </div>
         )}
 
-        {/* Step 2 — Create account */}
+        {/* Step 2 — Sign in or create account */}
         {step === "account" && (
           <div className="space-y-4">
+            {/* Sign in / Sign up toggle */}
+            <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+              <button
+                className={`flex-1 py-2.5 text-sm font-medium transition cursor-pointer ${
+                  accountMode === "signin"
+                    ? "bg-council text-white"
+                    : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                }`}
+                onClick={() => { setAccountMode("signin"); setError(""); }}
+              >
+                Sign in
+              </button>
+              <button
+                className={`flex-1 py-2.5 text-sm font-medium transition cursor-pointer ${
+                  accountMode === "signup"
+                    ? "bg-council text-white"
+                    : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                }`}
+                onClick={() => { setAccountMode("signup"); setError(""); }}
+              >
+                Create account
+              </button>
+            </div>
+
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600 leading-relaxed">
-              <p className="font-medium text-gray-700 mb-1">Why create an account?</p>
-              <p>
-                To verify your identity and protect your order, we need you to create an account
-                with a password and authenticator app. This uses multi-factor authentication (MFA)
-                — no redirect to a separate login page needed.
-              </p>
+              {accountMode === "signin" ? (
+                <>
+                  <p className="font-medium text-gray-700 mb-1">Sign in to continue</p>
+                  <p>
+                    Enter your email and password to verify your identity. You'll need your
+                    authenticator app to complete the sign-in.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-medium text-gray-700 mb-1">Why create an account?</p>
+                  <p>
+                    To verify your identity and protect your order, we need you to create an account
+                    with a password and authenticator app. This uses multi-factor authentication (MFA)
+                    — no redirect to a separate login page needed.
+                  </p>
+                </>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
@@ -181,9 +227,12 @@ export default function BinOrderInlineFlow({ onBack }: BinOrderInlineFlowProps) 
               <button
                 className="flex-1 bg-council hover:bg-council-dark text-white font-semibold py-3 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 disabled={!form.email || !form.password || loading}
-                onClick={handleCreateAccount}
+                onClick={handleAccount}
               >
-                {loading ? "Creating account..." : "Create account"}
+                {loading
+                  ? accountMode === "signin" ? "Signing in..." : "Creating account..."
+                  : accountMode === "signin" ? "Sign in" : "Create account"
+                }
               </button>
             </div>
           </div>
