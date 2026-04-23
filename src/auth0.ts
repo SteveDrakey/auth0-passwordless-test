@@ -43,6 +43,13 @@ export async function startPasswordless(email: string): Promise<void> {
   }
 }
 
+export async function sendMagicLink(email: string): Promise<void> {
+  const { status, body } = await postJson("/api/send-link", { email });
+  if (status < 200 || status >= 300) {
+    throw new Error(formatAuth0Error("/api/send-link", status, body));
+  }
+}
+
 export async function getMfaLoginUrl(): Promise<string> {
   const { status, body } = await postJson("/api/mfa-login", {});
   if (status < 200 || status >= 300) {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ServiceSelector, { type Service } from "./components/ServiceSelector";
 import StreetlightFlow from "./components/StreetlightFlow";
+import StreetlightMagicFlow from "./components/StreetlightMagicFlow";
 import BinOrderInlineFlow from "./components/BinOrderInlineFlow";
 import BinOrderUniversalFlow from "./components/BinOrderUniversalFlow";
 
@@ -9,13 +10,13 @@ type View = "select" | Service;
 export default function App() {
   const [view, setView] = useState<View>("select");
 
-  // Parse URL hash for MFA callback results
+  // Parse URL hash for callback results
   useEffect(() => {
     const hash = window.location.hash;
-    if (hash.startsWith("#mfa-complete")) {
+    if (hash.startsWith("#mfa-complete") || hash.startsWith("#mfa-error")) {
       setView("bin-universal");
-    } else if (hash.startsWith("#mfa-error")) {
-      setView("bin-universal");
+    } else if (hash.startsWith("#magic-complete") || hash.startsWith("#magic-error")) {
+      setView("streetlight-magic");
     }
   }, []);
 
@@ -52,6 +53,7 @@ export default function App() {
           </>
         )}
         {view === "streetlight" && <StreetlightFlow onBack={goHome} />}
+        {view === "streetlight-magic" && <StreetlightMagicFlow onBack={goHome} />}
         {view === "bin-inline" && <BinOrderInlineFlow onBack={goHome} />}
         {view === "bin-universal" && <BinOrderUniversalFlow onBack={goHome} />}
       </div>
