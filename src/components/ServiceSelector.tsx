@@ -9,7 +9,7 @@ interface ServiceCard {
   title: string;
   description: string;
   badge: string;
-  assurance: "Low" | "Medium";
+  assurance: "Low" | "Med";
   icon: React.ReactNode;
 }
 
@@ -29,7 +29,7 @@ const cards: ServiceCard[] = [
   {
     service: "streetlight",
     title: "Report a streetlight",
-    description: "Enter a code sent to your email to verify your identity",
+    description: "Submit a simple form and verify via a code sent to your email",
     badge: "Email OTP",
     assurance: "Low",
     icon: streetlightIcon,
@@ -45,24 +45,29 @@ const cards: ServiceCard[] = [
   {
     service: "bin-inline",
     title: "Order a new bin",
-    description: "Sign in with password and authenticator app, all within this site",
+    description: "Sign in with your persistent account using password and MFA",
     badge: "Inline MFA",
-    assurance: "Medium",
+    assurance: "Med",
     icon: binIcon,
   },
   {
     service: "bin-universal",
     title: "Order a new bin",
-    description: "Redirects to a hosted Auth0 login page for password and MFA",
+    description: "Sign in via a hosted Auth0 page with password and MFA",
     badge: "Universal Login",
-    assurance: "Medium",
+    assurance: "Med",
     icon: binIcon,
   },
 ];
 
 const assuranceStyles = {
-  Low: "bg-blue-50 text-blue-700",
-  Medium: "bg-amber-50 text-amber-700",
+  Low: "bg-green-50 text-green-700 border-green-200",
+  Med: "bg-amber-50 text-amber-700 border-amber-200",
+};
+
+const assuranceBorder = {
+  Low: "hover:border-green-400",
+  Med: "hover:border-amber-400",
 };
 
 export default function ServiceSelector({ onSelect }: ServiceSelectorProps) {
@@ -85,14 +90,22 @@ export default function ServiceSelector({ onSelect }: ServiceSelectorProps) {
 
           <hr className="my-4 border-gray-100" />
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${assuranceStyles.Low}`}>Low</span>
-              <p className="text-gray-500 text-xs mt-1 ml-0.5">Contactable identity — prove you own the email</p>
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${assuranceStyles.Low}`}>Low</span>
+                <span className="text-gray-700 text-xs font-semibold">Engage, Submit and Track</span>
+              </div>
+              <p className="text-gray-500 text-xs mt-1.5 ml-0.5 italic">We're proving we can reach the customer — not who they are</p>
+              <p className="text-gray-400 text-xs mt-1 ml-0.5">Email, Magic Link, SMS OTP</p>
             </div>
             <div>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${assuranceStyles.Medium}`}>Medium</span>
-              <p className="text-gray-500 text-xs mt-1 ml-0.5">Persistent account — password + MFA</p>
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${assuranceStyles.Med}`}>Med</span>
+                <span className="text-gray-700 text-xs font-semibold">Self-Serve</span>
+              </div>
+              <p className="text-gray-500 text-xs mt-1.5 ml-0.5 italic">A consistent digital identity, but not yet a legally verified one</p>
+              <p className="text-gray-400 text-xs mt-1 ml-0.5">Persistent CIAM identity, MFA, profile, sessions</p>
             </div>
           </div>
         </div>
@@ -104,7 +117,7 @@ export default function ServiceSelector({ onSelect }: ServiceSelectorProps) {
           <button
             key={card.service}
             onClick={() => onSelect(card.service)}
-            className="w-full bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6 text-left hover:border-council hover:shadow-md transition-all cursor-pointer group"
+            className={`w-full bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6 text-left ${assuranceBorder[card.assurance]} hover:shadow-md transition-all cursor-pointer group`}
           >
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-lg bg-council-50 flex items-center justify-center text-council flex-shrink-0 group-hover:bg-council-100 transition-colors">
