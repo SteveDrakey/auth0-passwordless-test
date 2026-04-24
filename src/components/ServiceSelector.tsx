@@ -45,8 +45,8 @@ const cards: ServiceCard[] = [
   {
     service: "streetlight-universal",
     title: "Report a streetlight",
-    description: "Email collected in-app, then pre-filled on Auth0 via login_hint",
-    badge: "Universal + login_hint",
+    description: "Email collected in-app, pre-filled on Auth0 via login_hint, verified with OTP",
+    badge: "Universal Login + OTP",
     assurance: "Low",
     icon: streetlightIcon,
   },

@@ -63,7 +63,7 @@ export default function StreetlightUniversalFlow({ onBack }: StreetlightUniversa
     setLoading(true);
     try {
       sessionStorage.setItem("mfa-return-flow", "streetlight-universal");
-      const url = await getMfaLoginUrl(form.email);
+      const url = await getMfaLoginUrl({ loginHint: form.email, connection: "email" });
       window.location.href = url;
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e));
@@ -148,9 +148,8 @@ export default function StreetlightUniversalFlow({ onBack }: StreetlightUniversa
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600 leading-relaxed">
               <p className="font-medium text-gray-700 mb-1">Why provide an email?</p>
               <p>
-                Your email will be used to sign in via Auth0 on the next step.
-                It will be pre-filled on the login page using <code className="text-xs bg-white px-1 py-0.5 rounded border border-gray-200">login_hint</code> so
-                you won't need to type it again.
+                Your email will be passed to Auth0 using <code className="text-xs bg-white px-1 py-0.5 rounded border border-gray-200">login_hint</code> so
+                it's pre-filled on the login page. Auth0 will send you a one-time code to verify.
               </p>
             </div>
             <div className="flex gap-3">
@@ -193,9 +192,9 @@ export default function StreetlightUniversalFlow({ onBack }: StreetlightUniversa
             <div className="bg-amber-50 border-l-4 border-accent rounded-r-lg p-5">
               <p className="font-semibold text-gray-800 mb-1">Verify your identity</p>
               <p className="text-sm text-gray-600 leading-relaxed mb-3">
-                You'll be redirected to Auth0 to sign in. Your email <strong>{form.email}</strong> will
-                be pre-filled using <code className="text-xs bg-white/60 px-1 py-0.5 rounded">login_hint</code> so
-                you only need to enter your password.
+                You'll be redirected to Auth0 where your email <strong>{form.email}</strong> will
+                be pre-filled via <code className="text-xs bg-white/60 px-1 py-0.5 rounded">login_hint</code>.
+                Auth0 will send a one-time code to verify your identity.
               </p>
               <button
                 className="bg-accent hover:bg-accent-dark text-navy font-semibold py-2.5 px-5 rounded-lg text-sm transition disabled:opacity-50 cursor-pointer flex items-center gap-2"

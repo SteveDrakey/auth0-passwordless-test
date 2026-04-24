@@ -10,7 +10,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const origin = host.includes("localhost") ? `http://${host}` : `${proto}://${host}`;
   const callbackUrl = `${origin}/api/mfa-callback`;
 
-  const { login_hint } = req.body ?? {};
+  const { login_hint, connection } = req.body ?? {};
 
   const params = new URLSearchParams({
     response_type: "code",
@@ -18,7 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     redirect_uri: callbackUrl,
     scope: "openid profile email",
     audience: "https://tn-dataverse-contact-api",
-    connection: "Username-Password-Authentication",
+    connection: connection || "Username-Password-Authentication",
     state,
   });
 
