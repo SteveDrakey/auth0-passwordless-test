@@ -1,4 +1,4 @@
-export type Service = "streetlight" | "streetlight-magic" | "bin-inline" | "bin-universal";
+export type Service = "streetlight" | "streetlight-magic" | "bin-inline" | "bin-universal" | "bin-universal-hint";
 
 interface ServiceSelectorProps {
   onSelect: (service: Service) => void;
@@ -55,6 +55,14 @@ const cards: ServiceCard[] = [
     title: "Order a new bin",
     description: "Sign in via a hosted Auth0 page with password and MFA",
     badge: "Universal Login",
+    assurance: "Med",
+    icon: binIcon,
+  },
+  {
+    service: "bin-universal-hint",
+    title: "Order a new bin",
+    description: "Email collected in-app, then pre-filled on Auth0 via login_hint",
+    badge: "Universal + login_hint",
     assurance: "Med",
     icon: binIcon,
   },

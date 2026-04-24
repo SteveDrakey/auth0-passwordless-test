@@ -10,6 +10,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const origin = host.includes("localhost") ? `http://${host}` : `${proto}://${host}`;
   const callbackUrl = `${origin}/api/mfa-callback`;
 
+  const { login_hint } = req.body ?? {};
+
   const params = new URLSearchParams({
     response_type: "code",
     client_id: process.env.AUTH0_CLIENT_ID!,
@@ -19,6 +21,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     connection: "Username-Password-Authentication",
     state,
   });
+
+  if (login_hint) params.set("login_hint", login_hint);
 
   const url = `https://${process.env.AUTH0_DOMAIN}/authorize?${params.toString()}`;
 

@@ -4,6 +4,7 @@ import StreetlightFlow from "./components/StreetlightFlow";
 import StreetlightMagicFlow from "./components/StreetlightMagicFlow";
 import BinOrderInlineFlow from "./components/BinOrderInlineFlow";
 import BinOrderUniversalFlow from "./components/BinOrderUniversalFlow";
+import BinOrderUniversalHintFlow from "./components/BinOrderUniversalHintFlow";
 
 type View = "select" | Service;
 
@@ -14,7 +15,9 @@ export default function App() {
   useEffect(() => {
     const hash = window.location.hash;
     if (hash.startsWith("#mfa-complete") || hash.startsWith("#mfa-error")) {
-      setView("bin-universal");
+      const returnFlow = sessionStorage.getItem("mfa-return-flow");
+      sessionStorage.removeItem("mfa-return-flow");
+      setView(returnFlow === "bin-universal-hint" ? "bin-universal-hint" : "bin-universal");
     } else if (hash.startsWith("#magic-complete") || hash.startsWith("#magic-error")) {
       setView("streetlight-magic");
     }
@@ -56,6 +59,7 @@ export default function App() {
         {view === "streetlight-magic" && <StreetlightMagicFlow onBack={goHome} />}
         {view === "bin-inline" && <BinOrderInlineFlow onBack={goHome} />}
         {view === "bin-universal" && <BinOrderUniversalFlow onBack={goHome} />}
+        {view === "bin-universal-hint" && <BinOrderUniversalHintFlow onBack={goHome} />}
       </div>
     </div>
   );

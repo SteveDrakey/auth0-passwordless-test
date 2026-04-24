@@ -50,8 +50,8 @@ export async function sendMagicLink(email: string): Promise<void> {
   }
 }
 
-export async function getMfaLoginUrl(): Promise<string> {
-  const { status, body } = await postJson("/api/mfa-login", {});
+export async function getMfaLoginUrl(loginHint?: string): Promise<string> {
+  const { status, body } = await postJson("/api/mfa-login", loginHint ? { login_hint: loginHint } : {});
   if (status < 200 || status >= 300) {
     throw new Error(formatAuth0Error("/api/mfa-login", status, body));
   }
