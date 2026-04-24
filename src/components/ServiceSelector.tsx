@@ -67,7 +67,7 @@ const assuranceStyles = {
 
 export default function ServiceSelector({ onSelect }: ServiceSelectorProps) {
   return (
-    <div className="flex gap-10 items-start">
+    <div className="flex gap-10 items-start justify-center">
       {/* Left panel — explainer */}
       <div className="w-80 flex-shrink-0 sticky top-8">
         <h1 className="text-2xl font-bold text-navy">Council services</h1>
@@ -96,7 +96,7 @@ export default function ServiceSelector({ onSelect }: ServiceSelectorProps) {
       </div>
 
       {/* Right panel — service cards */}
-      <div className="flex-1 space-y-4">
+      <div className="flex-1 max-w-xl space-y-4">
         {cards.map((card) => (
           <button
             key={card.service}
