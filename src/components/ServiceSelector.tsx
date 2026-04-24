@@ -67,30 +67,36 @@ const assuranceStyles = {
 
 export default function ServiceSelector({ onSelect }: ServiceSelectorProps) {
   return (
-    <>
-      <div className="mb-6">
+    <div className="flex gap-10 items-start">
+      {/* Left panel — explainer */}
+      <div className="w-80 flex-shrink-0 sticky top-8">
         <h1 className="text-2xl font-bold text-navy">Council services</h1>
         <p className="text-gray-500 text-sm mt-1">Choose a service to get started</p>
-        <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-600 leading-relaxed">
+
+        <div className="mt-5 bg-white border border-gray-200 rounded-xl px-5 py-5 text-sm text-gray-600 leading-relaxed shadow-sm">
           <p>
-            Identity powered by <strong>Auth0</strong>. Each card below is the same service
+            Identity powered by <strong>Auth0</strong>. Each card is the same service
             with a different authentication method, demonstrating how a single platform
             supports multiple assurance levels.
           </p>
-          <div className="mt-2 space-y-1 text-xs">
+
+          <hr className="my-4 border-gray-100" />
+
+          <div className="space-y-3">
             <div>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${assuranceStyles.Low}`}>Low</span>
-              <span className="text-gray-500 ml-2">Contactable identity — prove you own the email</span>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${assuranceStyles.Low}`}>Low</span>
+              <p className="text-gray-500 text-xs mt-1 ml-0.5">Contactable identity — prove you own the email</p>
             </div>
             <div>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${assuranceStyles.Medium}`}>Medium</span>
-              <span className="text-gray-500 ml-2">Persistent account — password + MFA</span>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${assuranceStyles.Medium}`}>Medium</span>
+              <p className="text-gray-500 text-xs mt-1 ml-0.5">Persistent account — password + MFA</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="space-y-4">
+      {/* Right panel — service cards */}
+      <div className="flex-1 space-y-4">
         {cards.map((card) => (
           <button
             key={card.service}
@@ -120,6 +126,6 @@ export default function ServiceSelector({ onSelect }: ServiceSelectorProps) {
           </button>
         ))}
       </div>
-    </>
+    </div>
   );
 }

@@ -26,7 +26,7 @@ export default function App() {
     <div className="min-h-screen bg-[#dee2e6]">
       {/* Council-style header bar */}
       <div className="bg-council">
-        <div className="max-w-lg mx-auto px-5 py-4 flex items-center justify-between">
+        <div className={`${view === "select" ? "max-w-5xl" : "max-w-lg"} mx-auto px-5 py-4 flex items-center justify-between transition-all`}>
           <div className="flex items-center gap-3">
             <div>
               <div className="text-white font-bold text-base tracking-wide">Leeds</div>
@@ -43,7 +43,7 @@ export default function App() {
       {/* Amber accent strip */}
       <div className="h-1 bg-accent"></div>
 
-      <div className="max-w-lg mx-auto px-5 py-8">
+      <div className={`${view === "select" ? "max-w-5xl" : "max-w-lg"} mx-auto px-5 py-8 transition-all`}>
         {view === "select" && (
           <>
             <ServiceSelector onSelect={setView} />
