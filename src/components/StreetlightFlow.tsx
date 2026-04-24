@@ -108,7 +108,7 @@ export default function StreetlightFlow({ onBack }: StreetlightFlowProps) {
                 className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-council/30 focus:border-council outline-none transition min-h-[100px] resize-y"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="e.g. The streetlight outside 42 Oak Road has been out for a week"
+                placeholder="e.g. The streetlight outside 14 Leeds Bridge Walk has been out for a week"
               />
             </div>
             <button

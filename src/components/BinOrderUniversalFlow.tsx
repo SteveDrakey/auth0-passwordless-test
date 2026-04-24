@@ -121,7 +121,7 @@ export default function BinOrderUniversalFlow({ onBack }: BinOrderUniversalFlowP
                 className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-council/30 focus:border-council outline-none transition"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="e.g. 42 Oak Road, Leeds, LS1 2AB"
+                placeholder="e.g. 23 Headingley Crescent, Leeds, LS6 3PB"
               />
             </div>
             <button

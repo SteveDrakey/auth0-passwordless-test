@@ -136,7 +136,7 @@ export default function BinOrderInlineFlow({ onBack }: BinOrderInlineFlowProps) 
                 className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-council/30 focus:border-council outline-none transition"
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
-                placeholder="e.g. 42 Oak Road, Northampton, NN1 2AB"
+                placeholder="e.g. 7 Kirkgate Lane, Leeds, LS2 7DJ"
               />
             </div>
             <button
