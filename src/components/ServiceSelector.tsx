@@ -67,13 +67,16 @@ const assuranceStyles = {
 
 export default function ServiceSelector({ onSelect }: ServiceSelectorProps) {
   return (
-    <div className="flex gap-10 items-start justify-center">
-      {/* Left panel — explainer */}
-      <div className="w-80 flex-shrink-0 sticky top-8">
+    <div>
+      <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-navy">Council services</h1>
         <p className="text-gray-500 text-sm mt-1">Choose a service to get started</p>
+      </div>
 
-        <div className="mt-5 bg-white border border-gray-200 rounded-xl px-5 py-5 text-sm text-gray-600 leading-relaxed shadow-sm">
+      <div className="flex gap-10 items-start justify-center">
+      {/* Left panel — explainer */}
+      <div className="w-80 flex-shrink-0 sticky top-8">
+        <div className="bg-white border border-gray-200 rounded-xl px-5 py-5 text-sm text-gray-600 leading-relaxed shadow-sm">
           <p>
             Identity powered by <strong>Auth0</strong>. Each card is the same service
             with a different authentication method, demonstrating how a single platform
@@ -125,6 +128,7 @@ export default function ServiceSelector({ onSelect }: ServiceSelectorProps) {
             </div>
           </button>
         ))}
+      </div>
       </div>
     </div>
   );
